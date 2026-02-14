@@ -6,9 +6,8 @@
 3. [File Inventory](#file-inventory)
 4. [Phase 1: Catalog Item Configuration](#phase-1-catalog-item-configuration)
 5. [Phase 2: Flow Designer Logic (Step-by-Step)](#phase-2-flow-designer-logic-step-by-step)
-6. [QA & Testing](#qa--testing)
-7. [How to Install](#how-to-install)
-8. [Technical Takeaways for Recruiters](#technical-takeaways-for-recruiters)
+6. [How to Install](#how-to-install)
+7. [Technical Takeaways for Recruiters](#technical-takeaways-for-recruiters)
 
 ---
 
@@ -27,8 +26,6 @@ The workflow follows a "Request-to-Fulfillment" path:
 2. **Approval:** Flow identifies the user's manager and pauses for their digital signature.
 3. **Logic Branching:** If approved, the flow extracts variables; if rejected, it closes the request.
 4. **Tasking:** Sequential tasks ensure inventory is checked before shipping.
-
-
 
 ---
 
@@ -102,15 +99,6 @@ The workflow follows a "Request-to-Fulfillment" path:
 > * **Step 14: Send Email (Rejection)**
 >   * **Body:** Your request was not approved. It has been closed.
 
-
-
----
-
-## 🧪 QA & Testing
-* **Scenario A (Full Path):** Tested with "Large" and "Gift Wrap = Yes". Verified 3 tasks created and RITM closed as "Complete".
-* **Scenario B (Rejection):** Verified that the flow stops immediately upon rejection and sets state to "Closed Incomplete".
-* **Data Integrity:** Used **Execution Details** to confirm "Delivery Instructions" passed correctly from the form to the Shipping Task.
-
 ---
 
 ## 🛠️ How to Install
@@ -121,7 +109,7 @@ The workflow follows a "Request-to-Fulfillment" path:
 
 ---
 
-## 💡 Technical Takeaways for Recruiters
+## 💡 Key Functions
 * **Dot-Walking:** Dynamically pulled manager data via reference fields.
 * **Variable Mapping:** Successfully orchestrated data flow between Catalog Items and Flow Designer.
 * **Error Handling:** Implemented an `Else` path to ensure terminal states for rejected records.
