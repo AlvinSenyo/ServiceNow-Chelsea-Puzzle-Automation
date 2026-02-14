@@ -1,0 +1,103 @@
+================================================================================
+SERVICENOW PROJECT: CHELSEA STADIUM PUZZLE REPLICATION GUIDE
+Author: Senyo Aborgah
+Instance Version: Zurich (Workflow Studio)
+================================================================================
+
+[PHASE 1: CATALOG ITEM SETUP]
+Navigation: Service Catalog > Catalog Definitions > Maintain Items
+
+1. Create New Record: Chelsea Stadium Puzzle (Price: 25.00)
+2. Add Variables (Related List at bottom):
+   - [Multiple Choice]: "Select Puzzle Size" (Name: size)
+     -> Choices: Small ($0), Medium ($12.99), Large ($21.99)
+   - [Yes/No]: "Gift Wrapped?" (Name: gift_wrapped)
+   - [Date]: "Delivery Date" (Name: date_of_delivery)
+   - [Multi-line Text]: "Delivery Instructions" (Name: delivery_instructions)
+
+--------------------------------------------------------------------------------
+
+[PHASE 2: FLOW DESIGNER LOGIC HIERARCHY]
+
+TRIGGER: Service Catalog
+
+STEP 1: Send Email (Acknowledgement)
+   - To: [Trigger->RITM->Requested for->Email]
+   - Subject: Order Received - [Trigger->RITM->Number]
+   - Body: 
+     Hello [Trigger->RITM->Requested for->First Name],
+     Thank you for your order of the Chelsea Stadium Puzzle. Your request has been 
+     sent to your manager for approval. You will receive an update shortly.
+
+STEP 2: Ask For Approval
+   - Record: [Trigger->RITM]
+   - Approver: [Trigger->RITM->Requested for->Manager]
+   - Rules: Anyone Approves.
+
+STEP 3: FLOW LOGIC - IF (Branch 1)
+   - Condition: [Step 2 -> Approval State] IS [Approved]
+   
+      --- START OF IF (APPROVED) BRANCH ---
+
+      STEP 4: Get Catalog Variables 
+         - (Select: size, gift_wrapped, date_of_delivery, delivery_instructions)
+
+      STEP 5: Send Email (Approval Notification)
+         - To: [Trigger->RITM->Requested for->Email]
+         - Subject: Order Approved & Processing - [Trigger->RITM->Number]
+         - Body: Great news! Your manager has approved your request for the 
+           Chelsea Stadium Puzzle. Our team is now preparing your item.
+
+      STEP 6: Create Catalog Task (Inventory)
+         - Short Description: Check stock for [Step 4 -> Size] puzzle.
+         - Wait: Checked.
+
+      STEP 7: FLOW LOGIC - IF (Nested Logic)
+         - Condition: [Step 4 -> Gift Wrapped] IS [True]
+            
+            --- START OF NESTED IF ---
+            STEP 8: Create Catalog Task (Wrapping)
+               - Short Description: Gift wrap the puzzle.
+            --- END OF NESTED IF ---
+
+      STEP 9: Create Catalog Task (Shipping)
+         - Short Description: Post item out.
+         - Description: [Step 4 -> Delivery Instructions].
+         - Wait: Checked.
+
+      STEP 10: Send Email (Shipping Notification)
+         - To: [Trigger->RITM->Requested for->Email]
+         - Subject: Your Chelsea Puzzle has Shipped!
+         - Body: Your order is on its way. Expect delivery by [Step 4->Date].
+           Special Instructions: [Step 4->Delivery Instructions]
+
+      STEP 11: Update Record (RITM)
+         - Field: State = Closed Complete.
+
+      --- END OF IF (APPROVED) BRANCH ---
+
+STEP 12: FLOW LOGIC - ELSE (Aligned with Step 3)
+   
+      --- START OF ELSE (REJECTED) BRANCH ---
+
+      STEP 13: Update Record (RITM)
+         - Field: State = Closed Incomplete.
+         - Work Notes: "Manager has rejected this request."
+
+      STEP 14: Send Email (Rejection Notice)
+         - To: [Trigger->RITM->Requested for->Email]
+         - Subject: Update regarding your Request - [Trigger->RITM->Number]
+         - Body: Your request for the Chelsea Stadium Puzzle was not approved. 
+           The request has been closed. Contact your manager for details.
+
+      --- END OF ELSE (REJECTED) BRANCH ---
+
+--------------------------------------------------------------------------------
+
+[PHASE 3: ACTIVATION & TESTING]
+1. In Flow Designer: Click [Save] and then [Activate].
+2. In 'Maintain Items' record: Set 'Flow' field to 'Chelsea Puzzle Fulfillment'.
+3. Testing: Use the 'Try It' button on the Catalog Item to submit a test order.
+4. Monitoring: View 'Flow Designer' > 'Executions' to watch the logic live.
+
+================================================================================
